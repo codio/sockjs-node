@@ -108,10 +108,10 @@ generate_dispatcher = (options) ->
 class Listener
     constructor: (@options, emit) ->
         @app = new App()
-        @app.options = options
+        @app.options = @options
         @app.emit = emit
         @app.log('debug', 'SockJS v' + sockjsVersion() + ' ' +
-                          'bound to ' + JSON.stringify(options.prefix))
+                          'bound to ' + JSON.stringify(@options.prefix))
         @dispatcher = generate_dispatcher(@options)
         @webjs_handler = webjs.generateHandler(@app, @dispatcher)
         @path_regexp = new RegExp('^' + @options.prefix  + '([/].+|[/]?)$')
@@ -133,6 +133,7 @@ class Server extends events.EventEmitter
             prefix: ''
             response_limit: 128*1024
             websocket: true
+            faye_server_options: null
             jsessionid: false
             heartbeat_delay: 25000
             disconnect_delay: 5000
