@@ -120,8 +120,7 @@ exports.GenericApp = class GenericApp
     log_request: (req, res, data) ->
         td = (new Date()) - req.start_date
         @log('info', req.method + ' ' + req.url + ' ' + td + 'ms ' +
-                (if res.finished then res._header.split('\r')[0].split(' ')[1] \
-                                  else '(unfinished)'))
+                (if res.finished then res.statusCode else '(unfinished)'))
         return data
 
     log: (severity, line) ->
@@ -175,7 +174,7 @@ exports.GenericApp = class GenericApp
         return content
 
     h_no_cache: (req, res, content) ->
-        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+        res.setHeader('Cache-Control', 'no-store, no-cache, no-transform, must-revalidate, max-age=0')
         return content
 
     expect_form: (req, res, _data, next_filter) ->
