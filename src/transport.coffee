@@ -5,7 +5,7 @@
 # ***** END LICENSE BLOCK *****
 
 stream = require('stream')
-uuid = require('node-uuid')
+uuid = require('uuid')
 utils = require('./utils')
 
 class Transport
@@ -131,8 +131,9 @@ class Session
 
         headers = {}
         for key in ['referer', 'x-client-ip', 'x-forwarded-for', \
-                    'x-cluster-client-ip', 'via', 'x-real-ip', 'host', \
-                    'user-agent', 'accept-language']
+                    'x-cluster-client-ip', 'via', 'x-real-ip', \
+                    'x-forwarded-proto', 'x-ssl', \
+                    'host', 'user-agent', 'accept-language']
             headers[key] = req.headers[key] if req.headers[key]
         if headers
             @connection.headers = headers
@@ -163,7 +164,7 @@ class Session
             x = =>
                 if @recv
                     @to_tref = setTimeout(x, @heartbeat_delay)
-                    @recv.doSendFrame("h")
+                    @recv.heartbeat()
             @to_tref = setTimeout(x, @heartbeat_delay)
         return
 
@@ -252,6 +253,7 @@ class GenericReceiver
         @thingy_end_cb = null
 
     didAbort: ->
+        @delay_disconnect = false
         @didClose()
 
     didClose: ->
@@ -265,6 +267,9 @@ class GenericReceiver
         q_msgs = for m in messages
                 utils.quote(m)
         @doSendFrame('a' + '[' + q_msgs.join(',') + ']')
+
+    heartbeat: ->
+        @doSendFrame('h')
 
 
 # Write stuff to response, using chunked encoding if possible.
